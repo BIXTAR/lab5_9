@@ -1,47 +1,50 @@
 package com.example.lab5_9
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.lab5_9.ui.theme.Lab5_9Theme
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+    private lateinit var pageCountEditText: EditText
+    private lateinit var discountSeekBar: SeekBar
+    private lateinit var discountLabel: TextView
+    private lateinit var calculateButton: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            Lab5_9Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+        setContentView(R.layout.activity_main)
+
+        pageCountEditText = findViewById(R.id.pageCountEditText)
+        discountSeekBar = findViewById(R.id.discountSeekBar)
+        discountLabel = findViewById(R.id.discountLabel)
+        calculateButton = findViewById(R.id.calculateButton)
+
+        discountSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                discountLabel.text = "Скидка: $progress%"
             }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
+        calculateButton.setOnClickListener {
+            val pageCount = pageCountEditText.text.toString().toIntOrNull()
+            val discount = discountSeekBar.progress
+
+            if (pageCount == null || pageCount <= 0) {
+                Toast.makeText(this, "Введите количество страниц", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val pricePerPage = 5
+            val total = pageCount * pricePerPage
+            val discountedTotal = total * (1 - discount / 100.0)
+
+            val intent = Intent(this, ResultActivity::class.java)
+            intent.putExtra("orderTotal", discountedTotal)
+            startActivity(intent)
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Lab5_9Theme {
-        Greeting("Android")
     }
 }
